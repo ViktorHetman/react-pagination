@@ -1,25 +1,41 @@
-import logo from './logo.svg';
-import './App.css';
+import axios from 'axios'
+import { useState, useEffect } from 'react'
+import './App.css'
+import CountyList from './Components/CountyList'
+import Pagination from './Components/Pagination'
+
+
 
 function App() {
+  const countriesPerPage = 10
+  const [countries, setCountries] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+
+  useEffect(() => {
+    const getCountriesData = async () => {
+      setLoading(true)
+      const res = await axios.get('https://restcountries.com/v3.1/all')
+      setCountries(res.data)
+      setLoading(false)
+    }
+    getCountriesData()
+  }, [])
+
+
+  const lastCountryIndex = currentPage * countriesPerPage
+  const firstCountryIndex = lastCountryIndex - countriesPerPage
+  const currentCountry = countries.slice(firstCountryIndex, lastCountryIndex)
+
+  const paginate = pageNumber => setCurrentPage(pageNumber) 
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <h1>Countires List</h1>
+      <CountyList countries={currentCountry} loading={loading}/>
+      <Pagination countriesPerPage={countriesPerPage} totalCountries={countries.length} paginate={paginate}/>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
